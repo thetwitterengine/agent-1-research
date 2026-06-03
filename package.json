@@ -1,0 +1,16 @@
+{
+  "name": "agent-1-research",
+  "version": "1.0.0",
+  "description": "Founder Research Agent",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "axios": "^1.17.0",
+    "dotenv": "^17.4.2",
+    "googleapis": "^173.0.0",
+    "rss-parser": "^3.13.0"
+  }
+}
