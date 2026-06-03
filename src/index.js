@@ -16,59 +16,66 @@ async function main() {
 
   console.log(`Found ${articles.length} articles\n`);
 
-  for (const article of articles.slice(0, 10)) {
-    try {
-      const analysis = await analyzeArticle(article.title);
+  const articlesToAnalyze = articles.slice(0, 30);
 
-      if (!analysis) continue;
+const results = await Promise.all(
+  articlesToAnalyze.map(async (article) => ({
+    article,
+    analysis: await analyzeArticle(article.title)
+  }))
+);
 
-      if (analysis.relevant && analysis.score >= 7) {
-        const today =
-            new Date().toISOString().split("T")[0];
+for (const { article, analysis } of results) {
+  try {
+    if (!analysis) continue;
 
-            const companyKey =
-              analysis.company !== "Unknown"
-                ? `${today}-${analysis.company}`
-                : `${today}-${article.title}`;
+    if (analysis.relevant && analysis.score >= 7) {
+      const today =
+        new Date().toISOString().split("T")[0];
 
-            const articleId = createId(companyKey);
+      const companyKey =
+        analysis.company !== "Unknown"
+          ? `${today}-${analysis.company}`
+          : `${today}-${article.title}`;
 
-            if (existingIds.has(articleId)) {
-            console.log(
-                `✗ Duplicate Company: ${analysis.company}`
-            );
-            continue;
-            }
+      const articleId = createId(companyKey);
 
-            const existingScore =
-            companyScores.get(companyKey) || 0;
-
-            if (analysis.score <= existingScore) {
-            console.log(
-                `✗ Lower Score: ${analysis.company}`
-            );
-            continue;
-            }
-
-            await addRow([
-            today,
-            analysis.founder,
-            analysis.company,
-            article.title,
-            analysis.category,
-            article.link,
-            analysis.score,
-            articleId
-            ]);
-
-        console.log(`✓ Saved: ${article.title}`);
-      } else {
-        console.log(`✗ Skipped: ${article.title}`);
+      if (existingIds.has(articleId)) {
+        console.log(
+          `✗ Duplicate Company: ${analysis.company}`
+        );
+        continue;
       }
-    } catch (error) {
-      console.error(`Error: ${article.title}`);
+
+      const existingScore =
+        companyScores.get(companyKey) || 0;
+
+      if (analysis.score <= existingScore) {
+        console.log(
+          `✗ Lower Score: ${analysis.company}`
+        );
+        continue;
+      }
+
+      await addRow([
+        today,
+        analysis.founder,
+        analysis.company,
+        article.title,
+        analysis.category,
+        article.link,
+        analysis.score,
+        articleId
+      ]);
+
+      console.log(`✓ Saved: ${article.title}`);
+    } else {
+      console.log(`✗ Skipped: ${article.title}`);
     }
+  } catch (error) {
+    console.error(`Error: ${article.title}`);
   }
+}
 
   console.log("\nDone");
 }

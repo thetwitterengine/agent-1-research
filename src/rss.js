@@ -30,5 +30,18 @@ export async function getArticles() {
     }
   }
 
-  return allArticles;
+  return allArticles.filter(article => {
+  const title = article.title.toLowerCase();
+
+    return (
+      title.includes("startup") ||
+      title.includes("founder") ||
+      title.includes("ai") ||
+      title.includes("funding") ||
+      title.includes("raise") ||
+      title.includes("acquire") ||
+      title.includes("launch") ||
+      title.includes("ceo")
+    );
+  });
 }
